@@ -1,0 +1,67 @@
+#include <SoftwareSerial.h>
+
+SoftwareSerial mySerial(9, 10);
+
+const int led=13;
+const int alarm=8;
+int value=0;
+
+void setup() 
+   { 
+      mySerial.begin(9600);   // Setting the baud rate of GSM Module
+      Serial.begin(9600); 
+      delay(100);
+      pinMode(led, OUTPUT);
+      digitalWrite (led, LOW);
+      Serial.println("SUCCESSFULL..");
+   }
+ 
+void loop() 
+   {
+     while (Serial.available())
+        {
+           value = Serial.read();
+        }
+        
+      if (value == '0')
+       {
+          digitalWrite (led, LOW);
+          digitalWrite (alarm,LOW);
+       }
+       else if (value == '1')
+      {
+        digitalWrite (led, HIGH);
+        digitalWrite (alarm,LOW);
+      }
+     
+      else if (value == '2')
+      {
+        digitalWrite (alarm, HIGH);
+        digitalWrite (led,LOW);
+      }
+      else if (value == '3')
+      {
+        digitalWrite (alarm, LOW);
+        digitalWrite (led,LOW);
+       } 
+     else if (value == '4')
+     {
+      SendMessage();
+      digitalWrite (alarm, LOW);
+      digitalWrite (led,LOW);
+     }
+     if (mySerial.available()>0)
+   Serial.write(mySerial.read());
+   }
+
+void SendMessage()
+{
+  mySerial.println("AT+CMGF=1");    //Sets the GSM Module in Text Mode
+  delay(1000);  // Delay of 1000 milli seconds or 1 second
+  mySerial.println("AT+CMGS=\"+916282322766\"\r"); // Replace x with mobile number
+  delay(1000);
+  mySerial.println("DANGER ALERT");// The SMS text you want to send
+  delay(100);
+   mySerial.println((char)26);// ASCII code of CTRL+Z
+  delay(1000);
+}
